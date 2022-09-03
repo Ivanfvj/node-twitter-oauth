@@ -1,0 +1,47 @@
+version: '3.3'
+
+services:
+  node:
+    container_name: node_twitter_oauth
+    restart: always
+    build: .
+    depends_on:
+      - 'mongo'
+    environment:
+      APP_PORT: 3000
+      APP_DOMAIN: localhost
+      ENABLE_CORS: true
+      # ?authsource=admin in uri allow connection as root
+      MONGO_URI: mongodb://root:password@mongo:27017/twitter_service?authsource=admin
+      # We use MONGO_URI instead of all independent parameters. In both ways you can establish the mongo connection
+      # MONGO_HOST:
+      # MONGO_PORT:
+      # MONGO_DB_NAME:
+      # MONGO_DB_USER:
+      # MONGO_DB_PASSWORD:
+      TWITTER_CONSUMER_KEY:
+      TWITTER_CONSUMER_SECRET:
+      TWITTER_CONSUMER_BEARER_TOKEN:
+      TWITTER_OAUTH_CLIENT_ID:
+      TWITTER_OAUTH_CLIENT_SECRET:
+      # Our frontend demo callback page is on /callback route
+      # If you use ngrok for testing remember adding the complete route: https://970f-190-12-13-17.ngrok.io/callback
+      TWITTER_OAUTH_CALLBACK_URL:
+    ports:
+      - 3000:3000
+
+  mongo:
+    container_name: mongo
+    image: mongo:6
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: twitter_service
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb:/data/db
+
+volumes:
+  mongodb:
