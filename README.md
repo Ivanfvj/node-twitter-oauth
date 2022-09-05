@@ -8,6 +8,11 @@ Backend service and frontend demo application to send tweets with text and image
 
 Docker and docker-compose used for running the backend service on dev environment.
 
+```bash
+# Clone repository on your machine
+git clone https://github.com/Ivanfvj/node-twitter-oauth.git
+```
+
 ## Project structure
 
 **Backend:** Node.js service to communicate with the Twitter API and store session data.
@@ -30,9 +35,9 @@ To accomplish our goal we have to use the OAuth 1.0a flow so we can upload media
 ## Steps to reproduce in Twitter Developer Portal
 
 1. Create your developer account on the [Twitter Developer Portal](https://developer.twitter.com/en).
-2. Twitter gives you 3 keys: **CONSUMER_KEY, CONSUMER_SECRET and CONSUMER_BEARER_TOKEN**. Save them in a secure place, we will use them.
+2. Twitter gives you 3 keys: **CONSUMER_KEY, CONSUMER_SECRET** and **CONSUMER_BEARER_TOKEN**. Save them in a secure place, we will use them later.
 3. Create a project and app following twitter guided tour.
-4. Select your application and **Enable User authentication settings**. Select "Read and write and Direct message permissions", and activate the "Request email from users" option. In the section below "Type of App" select the "Web App, Automated App or Bot" option. Complete the App info section (for testing u can use ngrok to generate an HTTPS reverse proxy to your localhost application)
+4. Select your application and **Enable User authentication settings**. Select "Read and write and Direct message permissions", and activate the "Request email from users" option. In the section below "Type of App" select the "Web App, Automated App or Bot" option. Complete the App info section (for testing you can use ngrok to generate an HTTPS reverse proxy to your localhost application)
 5. Save the **APP_CLIENT_ID** and **APP_CLIENT_SECRET** keys in a secure place. We will use them later.
 
 ## OAuth flow
@@ -109,7 +114,7 @@ TWITTER_OAUTH_CALLBACK_URL=
 
 ### Run the backend
 
-U can use docker and docker-compose to run a MongoDB container in your localhost or dev environment.
+You can use docker and docker-compose to run a MongoDB container in your localhost or dev environment.
 
 If you don't have docker installed on your computer you can consider connecting to a MongoDB database using a MONGO_URI or using MongoDB Atlas.
 
