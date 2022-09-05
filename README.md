@@ -59,7 +59,25 @@ To accomplish our goal we have to use the OAuth 1.0a flow so we can upload media
 ### IMPORTANT
 
 HTTPS website URL is required for testing the Twitter API.
-You can create an HTTPS reverse proxy for your localhost app using [ngrok](https://ngrok.com/).
+You can create an HTTPS reverse proxy for your localhost app using [ngrok](https://ngrok.com/). After installing ngrok you can run a reverse proxy using the following command
+
+```bash
+# Run reverse ngrok proxy to your frontend localhost application
+# frontend default port is 8000
+ngrok http 8000
+
+# If you get an error (couldn't stablish connection from ngrok, you can try the following)
+ngrok http 127.0.0.1:8000
+
+# You can run this on a separate shell/terminal and get the https ngrok link 
+# to use as your website url on the Twitter Developer Portal configuration.
+
+# Remember updating the TWITTER_OAUTH_CALLBACK_URL environment variable on your 
+# ./backend/.env file every time you run the ngrok command. Then restart 
+# the backend service to get the .env file updates.
+
+# Example: https://970f-190-12-13-17.ngrok.io/callback
+```
 
 Then you need to update the Callback URI and Website URL on the [Twitter Developer Portal](https://developer.twitter.com/en).
 **REMEMBER** to update the **TWITTER_OAUTH_CALLBACK_URL** env variable on the backend project.
@@ -91,7 +109,7 @@ MONGO_URI=mongodb://root:password@localhost:27017/twitter_service?authsource=adm
 
 # Optional if MONGO_URI is not set
 MONGO_HOST=localhost
-MONGO_PORT=27018
+MONGO_PORT=27017
 MONGO_DB_NAME=twitter_service
 MONGO_DB_USER=root
 MONGO_DB_PASSWORD=password
