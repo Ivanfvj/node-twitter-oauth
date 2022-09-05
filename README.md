@@ -30,7 +30,7 @@ Twitter allows you to upload media using the OAuth 1.0a authentication flow and 
 
 You can use either the V1 or V2 Twitter API to create a tweet and attach the mediaId generated using the endpoint above.
 
-To accomplish our goal we have to use the OAuth 1.0a flow so we can upload media and send a tweet using the same accessToken and session crated by the user. (Most of the applications use Twitter OAuth 1.0a for this reasons, as V2 is in BETA)
+To accomplish our goal we have to use the OAuth 1.0a flow so we can upload media and send a tweet using the same accessToken and session created by the user. (Most of the applications use Twitter OAuth 1.0a for this reasons, as V2 is in BETA)
 
 ## Steps to reproduce in Twitter Developer Portal
 
@@ -43,14 +43,14 @@ To accomplish our goal we have to use the OAuth 1.0a flow so we can upload media
 ## OAuth flow
 
 1. Frontend request a loginUrl from backend. (When page loads TwitterLoginButton component, on mount lifecycle).
-2. User click the TwitterLoginButton and is redirected to the loginUrl from the step above. Twitter Authentication page is opened and user accept the permissions requested by our application to authenticate. (OAuth 1.0a don't have a specific scope, so user accept all the permissions)
-3. User is redirected to our **callbackUrl** configured on our Application in the Twitter Developer Portal (Project page section "User authentication settings").
-4. The callbackUrl is our callback page url. User is redirected to our frontend application page where we process the request extracting the query params. OAuth 1.0a send the **oauth_token** and **oauth_verifier** codes.
+2. User click the TwitterLoginButton and is redirected to the loginUrl from the step above. Twitter Authentication page is opened and user accept the permissions requested by our application to authenticate. (OAuth 1.0a don't have a specific scope, so the user accept all the permissions)
+3. User is redirected to our **callbackUrl** configured in our Application in the Twitter Developer Portal (Project page section "User authentication settings").
+4. The callbackUrl is our **/callback** page url (on the frontend app). User is redirected to our frontend application page where we process the request extracting the query params. OAuth 1.0a send the **oauth_token** and **oauth_verifier** codes.
 5. Immediately our application sends a POST request to our backend service with the **oauth_token** and **oauth_verifier** codes to login and exchange the data for a **Twitter accessToken**.
 6. Backend communicates with the Twitter API and send back to the frontend the accessToken and user profile information.
 7. User is logged in and stores the accessToken in localStorage, sessionStorage or any preference you decide.
 
-**NOTE:** The backend is sending the twitter accessToken (oauth_token) to the client and it's secure because the twitter API requires the accessTokenSecret (oauth_token_secret) to authenticate a request. The oauth_token_secret is stored in MongoDB and it's only available on the backend service.
+**NOTE:** The backend is sending the twitter accessToken (oauth_token) to the client and it's secure because the twitter API requires the accessTokenSecret (oauth_token_secret) to authenticate a request. The **oauth_token_secret** is stored in MongoDB and it's only available on the backend service. More information on [Twitter Authentication best practices here](https://developer.twitter.com/en/docs/authentication/guides/authentication-best-practices).
 
 **NOTE:** You can integrate your own authorization flow wih any user/authentication service in your company/databases and generate a custom JWT with user identifier if you don't want to share the user Twitter accessToken with the frontend.
 
@@ -165,70 +165,65 @@ npm run install
 # Run the code
 npm run build
 
-# The project is built on the dist file
+# The project is built on the dist directory
 ```
 
 ## How the backend service works?
 
 ### Endpoints available
 
-**GET /user**
-
-Get twitter profile data. Needs Authorization Header with Bearer token: `Authorization: Bearer token_here`
+| **Endpoint** | **Description** |
+|---|---|
+| `GET /user` | Get twitter profile data. Needs Authorization Header with Bearer token: `Authorization: Bearer token_here` |
 
 #### OAuth1 Endpoints (Twitter API V1)
 
-**POST /oauth1/link**
+| **Endpoint** | **Description** |
+|---|---|
+| `POST /oauth1/link` | Generates login URL for OAuth 1.0a flow with callbackUrl from environment variable as parameter. |
+| `POST /oauth1/callback` | Receives oauth_code and oauth_code_verifier from frontend callback page, validate the data and generates accessTokens. The user logs in. |
+| `POST /tweet` | Create a tweet with text and image using the Twitter API V1.1. (Requires login and accessToken) |
+| `POST /logout` | Logout the user and remove the user data from the accounts collection in MongoDB. |
 
-Generates login URL for OAuth 1.0a flow with callbackUrl from environment variable as parameter.
+#### OAuth2 Endpoints (Twitter API V2)
 
-**POST /oauth1/callback**
-
-Receives oauth_code and oauth_code_verifier from frontend callback page, validate the data and generates accessTokens. The user logs in.
-
-**POST /tweet**
-
-Create a tweet with text and image using the Twitter API V1.1. (Requires login and accessToken)
-
-**POST /logout**
-
-Logout the user and remove the user data from the accounts collection in MongoDB.
-
-#### OAuth1 Endpoints (Twitter API V2)
-
-**POST /oauth2/link**
-
-Generates login URL for OAuth 1.0a flow with callbackUrl from environment variable as parameter.
-
-**POST /oauth2/callback**
-
-Receives state and code from frontend callback page, validate the data and generates accessTokens. The user logs in.
+| **Endpoint** | **Description** |
+|---|---|
+| `POST /oauth2/link` | Generates login URL for OAuth 1.0a flow with callbackUrl from environment variable as parameter. |
+| `POST /oauth2/callback` | Receives state and code from frontend callback page, validate the data and generates accessTokens. The user logs in. |
 
 ### Image download/upload
 
-We handle file download from **HTTP and HTTPS** urls to upload the media to Twitter. Local disk storage is used as read/write stream, the file is deleted after uploaded using the Twitter API.
+We handle file download from **HTTP and HTTPS** urls to upload the media to Twitter. Local disk storage is used as read/write stream, the file is deleted after uploaded using the Twitter API. [Best practices for Twitter uploading media here](https://developer.twitter.com/en/docs/twitter-api/v1/media/upload-media/uploading-media/media-best-practices).
 
 ### MongoDB
 
-We use MongoDB to store OAuth and user data.
+We use MongoDB to store OAuth data and user data.
 
-Twitter Login State is saved on **twitter_oauth_states** collection and has a TTL expire index to automatically delete documents after 30 minutes.
+Twitter Login State is saved on **twitter_oauth_states** collection and has a TTL expire index to automatically delete documents after 30 minutes. (See twitter-oauth.ts file)
 
 ## Reference links
+
+### Twitter documentation
 
 - [Twitter OAuth 2.0 Authorization Code Flow with PKCE](https://developer.twitter.com/en/docs/authentication/oauth-2-0/user-access-token)
 - [Twitter OAuth 1.0a documentation](https://developer.twitter.com/en/docs/authentication/oauth-1-0a)
 - [Twitter API rate limits](https://developer.twitter.com/en/docs/twitter-api/rate-limits)
 - [Twitter Upload media endpoint](https://developer.twitter.com/en/docs/twitter-api/v1/media/upload-media/api-reference/post-media-upload)
-- [Twitter token refresher plugin](https://www.npmjs.com/package/@twitter-api-v2/plugin-token-refresher)
 - [Twitter Developer Dashboard](https://developer.twitter.com/en/portal/dashboard)
 - [Twitter Access levels and versions](https://developer.twitter.com/en/docs/twitter-api/getting-started/about-twitter-api#v2-access-leve)
 
+### Helpful Libraries
+
+- [Node.js Twitter API client --> twitter-api-v2 library](https://github.com/PLhery/node-twitter-api-v2)
+- [Twitter token refresher plugin](https://www.npmjs.com/package/@twitter-api-v2/plugin-token-refresher)
 - [Official Twitter API Typescript SDK (BETA)](https://github.com/twitterdev/twitter-api-typescript-sdk)
 - [Hello.js - A client-side Javascript SDK for authenticating with OAuth2 and OAuth1](https://adodson.com/hello.js/)
 - [Auth0 SDK for Single Page Applications using Authorization Code Grant Flow with PKCE](https://github.com/auth0/auth0-spa-js)
-  
 - [Passport Twitter - OAuth 1.0a API](https://github.com/jaredhanson/passport-twitter)
+
+### Sample projects
+
 - [Vue2 implementation tutorial with Hello.js for Twitter OAuth 1.0 login](https://developpaper.com/vue-js-implementation-of-twitter-third-party-login-api-in/)
 - [vue-authenticate library for social login and OAuth providers](https://github.com/dgrubelic/vue-authenticate)
 - [Vue2 Popup Window for Authentication and Authorization](https://github.com/oarepo/vue-popup-login/tree/2.x)
@@ -236,4 +231,4 @@ Twitter Login State is saved on **twitter_oauth_states** collection and has a TT
 
 ## Extras
 
-You can revoke application access [here](https://twitter.com/settings/connected_apps)
+You can revoke application access [here](https://twitter.com/settings/connected_apps).
